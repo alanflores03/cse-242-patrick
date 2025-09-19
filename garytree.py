@@ -16,7 +16,7 @@ def data_parse(filename):
 
             # Adding entry to the data_lists
             data_lists.append(entry)
-            
+
     return data_lists
 
 # Function to get the data file name from the user 
@@ -26,6 +26,8 @@ def get_file():
 
 # Function to test the data: WILL NOT BE IN THE FINAL SUBMISSION JUST FOR HOW YOU CAN SEE THE OUTPUT
 # Just call test() under here to see the output of the data parsing
+# Before running this, make sure you create the data file using datacreation.py. Creating 5 entries should be good enough for viewing the output, 
+# but definitely create more when we are testing the actual tree 
 def test():
     file = get_file()
     data = data_parse(file)
