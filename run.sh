@@ -1,3 +1,3 @@
 #!/bin/bash
 
-python3 garytre.py
+python3 garytree.py
