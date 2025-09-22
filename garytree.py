@@ -31,6 +31,7 @@ def data_parse(filename):
 
     return data_lists
 
+
 # Function to get the data file name from the user 
 # Returns the file name as a string
 def get_file():
@@ -43,19 +44,6 @@ def get_file():
     except Exception as e:
         print(f"An Unexpected error occurred: {e}")
         exit(1)
-
-
-# Function to test the data: WILL NOT BE IN THE FINAL SUBMISSION JUST FOR HOW YOU CAN SEE THE OUTPUT
-# Just call test() under here to see the output of the data parsing
-# Before running this, make sure you create the data file using datacreation.py. Creating 5 entries should be good enough for viewing the output, 
-# but definitely create more when we are testing the actual tree 
-def test():
-    file = get_file()
-    data = data_parse(file)
-    # again, the data is outputted as follows: [address, balance, hash(address)]
-    for i in data:
-        print(i)  # For testing purposes, print the parsed data
-        print()
         
 # Function to make the Merkle Tree
 # my_list will be the list returned from get_file()
@@ -70,9 +58,10 @@ def makeTree (my_list):
         globals()['node' + str(i)] = TreeNode(my_list[i])
         leafs.append(globals()['node' + str(i)])
 
-    for i in range(len(leafs) / 2):
+    for i in range(int(len(leafs) / 2)):
         #this only works for first layer of parent nodes
-        globals()['node' + str(i * 2) + str(i * 2 + 1)] = TreeNode(sha256(leafs[i * 2].data[2] + leafs[i * 2 + 1].data[2]).hexdigest)
+        globals()['node' + str(i * 2) + str(i * 2 + 1)] = TreeNode(sha256((leafs[i * 2].data[2] + leafs[i * 2 + 1].data[2]).encode('utf-8')).hexdigest())
+
         globals()['node' + str(i * 2) + str(i * 2 + 1)].left = leafs[i * 2]
         globals()['node' + str(i * 2) + str(i * 2 + 1)].right = leafs[i * 2 + 1]
         nodes.append(globals()['node' + str(i * 2) + str(i * 2 + 1)])
@@ -92,7 +81,7 @@ def makeTree (my_list):
                 nodes.append(globals()['node' + str(i * counter) + str(i * counter + counter/2 - 1)])
                 
             else :
-                globals()['node' + str(i * counter) + str((i + 1) * counter - 1)] = TreeNode(sha256(leafs[i * 2].data + leafs[i * 2 + 1].data).hexdigest)
+                globals()['node' + str(i * counter) + str((i + 1) * counter - 1)] = TreeNode(sha256((leafs[i * 2].data[2] + leafs[i * 2 + 1].data[2]).encode('utf-8')).hexdigest())
                 globals()['node' + str(i * counter) + str((i + 1) * counter - 1)].left = leafs[i * 2]
                 globals()['node' + str(i * counter) + str((i + 1) * counter - 1)].right = leafs[i * 2 + 1]                
                 nodes.append(globals()['node' + str(i * 4) + str((i + 1) * counter - 1)])
@@ -106,4 +95,20 @@ def makeTree (my_list):
     
     return leafs[0].data
 
+
+
+
+# Function to test the data: WILL NOT BE IN THE FINAL SUBMISSION JUST FOR HOW YOU CAN SEE THE OUTPUT
+# Just call test() under here to see the output of the data parsing
+# Before running this, make sure you create the data file using datacreation.py. Creating 5 entries should be good enough for viewing the output, 
+# but definitely create more when we are testing the actual tree 
+def test():
+    file = get_file()
+    data = data_parse(file)
+    # again, the data is outputted as follows: [address, balance, hash(address)]
+    for i in data:
+        print(i)  # For testing purposes, print the parsed data
+        print()
+    tree = makeTree(data)
+    print("The tree is: " + tree)
 test()
