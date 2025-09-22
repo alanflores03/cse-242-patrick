@@ -53,6 +53,7 @@ def get_file():
 def makeTree (my_list):
     leafs = []
     nodes = []
+    max_node = 0
 
     #makes all of the leaf nodes and adds to an array
     for i in range(len(my_list)) :
@@ -71,6 +72,7 @@ def makeTree (my_list):
         globals()['node' +"_"+ str(len(leafs) - 1) +","+ str(len(leafs) - 1)] = TreeNode(sha256((leafs[len(leafs) - 1].data[2]).encode('utf-8')).hexdigest())
         nodes.append(globals()['node' +"_"+ str(len(leafs) - 1) +","+ str(len(leafs) - 1)])
 
+    max_node = len(leafs) - 1
     leafs = nodes
     nodes = []
 
@@ -96,11 +98,18 @@ def makeTree (my_list):
                     break
                 
             else :
-                globals()['node' +"_"+ str(i * counter) +"," +  str((i + 1) * counter - 1)] = TreeNode(sha256((leafs[i * 2].data[2] + leafs[i * 2 + 1].data[2]).encode('utf-8')).hexdigest())
-                globals()['node' +"_"+ str(i * counter) +"," +  str((i + 1) * counter - 1)].left = leafs[i * 2]
-                globals()['node' +"_"+ str(i * counter) +"," +  str((i + 1) * counter - 1)].right = leafs[i * 2 + 1]                
-                print('node' +"_"+ str(i * counter) +"," +  str((i + 1) * counter - 1))
-                nodes.append(globals()['node' +"_"+ str(i * counter) +"," +  str((i + 1) * counter - 1)])
+                if (i + 1) * counter - 1 > max_node:
+                    globals()['node' +"_"+ str(i * counter) +"," +  str(max_node)] = TreeNode(sha256((leafs[i * 2].data[2] + leafs[i * 2 + 1].data[2]).encode('utf-8')).hexdigest())
+                    globals()['node' +"_"+ str(i * counter) +"," +  str(max_node)].left = leafs[i * 2]
+                    globals()['node' +"_"+ str(i * counter) +"," +  str(max_node)].right = leafs[i * 2 + 1]                
+                    print('node' +"_"+ str(i * counter) +"," +  str(max_node))
+                    nodes.append(globals()['node' +"_"+ str(i * counter) +"," +  str(max_node)])
+                else:
+                    globals()['node' +"_"+ str(i * counter) +"," +  str((i + 1) * counter - 1)] = TreeNode(sha256((leafs[i * 2].data[2] + leafs[i * 2 + 1].data[2]).encode('utf-8')).hexdigest())
+                    globals()['node' +"_"+ str(i * counter) +"," +  str((i + 1) * counter - 1)].left = leafs[i * 2]
+                    globals()['node' +"_"+ str(i * counter) +"," +  str((i + 1) * counter - 1)].right = leafs[i * 2 + 1]                
+                    print('node' +"_"+ str(i * counter) +"," +  str((i + 1) * counter - 1))
+                    nodes.append(globals()['node' +"_"+ str(i * counter) +"," +  str((i + 1) * counter - 1)])
 
         counter = 2 * counter       
         leafs = nodes
