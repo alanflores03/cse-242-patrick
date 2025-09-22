@@ -6,23 +6,36 @@ from hashlib import sha256
 def data_parse(filename):
     # List to store the entries
     data_lists = []
-    with open(filename, "r", encoding='utf-8') as file:
+    try:
+        with open(filename, "r", encoding='utf-8') as file:
 
-        # Reading each entry in the file, hashing the address, and storing it all in a list
-        for line in file:
-            entry = line.strip().split(' ')
-            hashed_address = sha256((entry[0]).encode('utf-8')).hexdigest()
-            entry.append(hashed_address)
+            # Reading each entry in the file, hashing the address, and storing it all in a list
+            for line in file:
+                entry = line.strip().split(' ')
+                hashed_address = sha256((entry[0]).encode('utf-8')).hexdigest()
+                entry.append(hashed_address)
 
-            # Adding entry to the data_lists
-            data_lists.append(entry)
+                # Adding entry to the data_lists
+                data_lists.append(entry)
+    except Exception as e:
+        print(f"An Unexpected error occurred: {e}")
+        exit(1)
 
     return data_lists
 
 # Function to get the data file name from the user 
 # Returns the file name as a string
 def get_file():
-    return input("Enter the data file name: ").strip()
+    try:
+        filename = input("Enter the data file name: ").strip()
+        if not filename:
+            print ("Please enter a non-empty file name")
+            exit(2)
+        return filename
+    except Exception as e:
+        print(f"An Unexpected error occurred: {e}")
+        exit(1)
+
 
 # Function to test the data: WILL NOT BE IN THE FINAL SUBMISSION JUST FOR HOW YOU CAN SEE THE OUTPUT
 # Just call test() under here to see the output of the data parsing
@@ -35,3 +48,5 @@ def test():
     for i in data:
         print(i)  # For testing purposes, print the parsed data
         print()
+
+test()
