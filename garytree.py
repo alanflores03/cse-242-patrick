@@ -12,8 +12,6 @@ def makeTree (my_list):
     leafs = []
     nodes = []
 
-    # fix naming pls
-
     #makes all of the leaf nodes and adds to an array
     for i in range(len(my_list)):
         globals()['node' + str(i)] = TreeNode(my_list[i])
@@ -21,7 +19,7 @@ def makeTree (my_list):
 
     for i in range(len(leafs) / 2):
         #this only works for first layer of parent nodes
-        globals()['node' + str(i * 2) + str(i * 2 + 1)] = TreeNode(sha256(leafs[i * 2].data[2] + leafs[i * 2 + 1].data[2]))
+        globals()['node' + str(i * 2) + str(i * 2 + 1)] = TreeNode(sha256(leafs[i * 2].data[2] + leafs[i * 2 + 1].data[2]).hexdigest)
         globals()['node' + str(i * 2) + str(i * 2 + 1)].left = leafs[i * 2]
         globals()['node' + str(i * 2) + str(i * 2 + 1)].right = leafs[i * 2 + 1]
         nodes.append(globals()['node' + str(i * 2) + str(i * 2 + 1)])
@@ -41,7 +39,7 @@ def makeTree (my_list):
                 nodes.append(globals()['node' + str(i * counter) + str(i * counter + counter/2 - 1)])
                 
             else :
-                globals()['node' + str(i * counter) + str((i + 1) * counter - 1)] = TreeNode(sha256(leafs[i * 2].data + leafs[i * 2 + 1].data))
+                globals()['node' + str(i * counter) + str((i + 1) * counter - 1)] = TreeNode(sha256(leafs[i * 2].data + leafs[i * 2 + 1].data).hexdigest)
                 globals()['node' + str(i * counter) + str((i + 1) * counter - 1)].left = leafs[i * 2]
                 globals()['node' + str(i * counter) + str((i + 1) * counter - 1)].right = leafs[i * 2 + 1]                
                 nodes.append(globals()['node' + str(i * 4) + str((i + 1) * counter - 1)])
