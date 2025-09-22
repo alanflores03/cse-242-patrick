@@ -36,8 +36,7 @@ def data_parse(filename):
 # Returns the file name as a string
 def get_file():
     try:
-        #filename = input("Enter the data file name: ").strip()
-        filename = "testdata.txt"
+        filename = input("Enter the data file name: ").strip()
         if not filename:
             print ("Please enter a non-empty file name")
             exit(2)
@@ -79,14 +78,8 @@ def makeTree (my_list):
     counter = 4  #counter to fix naming convention
     
     while True :
-        print("length = ", len(leafs))
-        print((len(leafs) // 2))
-        print("counter = ", counter)
         
         for i in range((len(leafs) // 2) + 1) :
-            print()
-            print("i = ", i)
-            
             # if odd number of leafs, make last node only have left child
             if i == ((len(leafs) // 2)) :
                 if len(leafs) % 2 != 0 :
@@ -98,12 +91,15 @@ def makeTree (my_list):
                     break
                 
             else :
+                # checks if the next iteration of max node (i * counter - 1) is greater than our max node
+                # if so, name the last node with our max value and break out of the loop (bc we know this will be the last node)
                 if (i + 1) * counter - 1 > max_node:
                     globals()['node' +"_"+ str(i * counter) +"," +  str(max_node)] = TreeNode(sha256((leafs[i * 2].data[2] + leafs[i * 2 + 1].data[2]).encode('utf-8')).hexdigest())
                     globals()['node' +"_"+ str(i * counter) +"," +  str(max_node)].left = leafs[i * 2]
                     globals()['node' +"_"+ str(i * counter) +"," +  str(max_node)].right = leafs[i * 2 + 1]                
                     print('node' +"_"+ str(i * counter) +"," +  str(max_node))
                     nodes.append(globals()['node' +"_"+ str(i * counter) +"," +  str(max_node)])
+                    break
                 else:
                     globals()['node' +"_"+ str(i * counter) +"," +  str((i + 1) * counter - 1)] = TreeNode(sha256((leafs[i * 2].data[2] + leafs[i * 2 + 1].data[2]).encode('utf-8')).hexdigest())
                     globals()['node' +"_"+ str(i * counter) +"," +  str((i + 1) * counter - 1)].left = leafs[i * 2]
