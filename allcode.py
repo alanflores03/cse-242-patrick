@@ -1,3 +1,63 @@
+####### datacreation.py #######
+
+# PREFACE: WE ARE USING CHATGPT TO GENERATE THIS ENTIRE FILE TO USE DATA
+import random
+import string
+
+def generate_hex_address(length=40):
+    """Generate a random hex string of given length (0-9, a-f)."""
+    return ''.join(random.choice('0123456789abcdef') for _ in range(length))
+
+def generate_test_data(num_entries=10, max_balance=10**7):
+    """Generate a list of (address, balance) pairs."""
+    addresses = set()
+    while len(addresses) < num_entries:
+        addresses.add(generate_hex_address())
+    
+    data = [(addr, random.randint(0, max_balance)) for addr in addresses]
+    return sorted(data, key=lambda x: x[0])  # sort alphabetically by address
+
+def main():
+    # Prompt for file name
+    filename = input("Enter the output file name (e.g., testdata.txt): ").strip()
+    if not filename:
+        print("Invalid file name.")
+        return
+    
+    # Prompt for number of test entries
+    try:
+        num_entries = int(input("Enter the number of entries to generate: ").strip())
+        if num_entries <= 0:
+            raise ValueError
+    except ValueError:
+        print("Invalid number of entries.")
+        return
+    
+    # Generate test data
+    test_data = generate_test_data(num_entries)
+    
+    # Write to file
+    with open(filename, "w") as f:
+        for addr, balance in test_data:
+            f.write(f"{addr} {balance}\n")
+    
+    print(f"Test data successfully written to {filename}")
+
+if __name__ == "__main__":
+    main()
+
+
+
+
+
+
+
+
+
+
+
+####### garytree.py #######
+
 from hashlib import sha256
 
 
@@ -77,11 +137,17 @@ def makeTree (my_list):
     leafs = nodes
     nodes = []
 
-    counter = 4  #counter for naming convention
+    counter = 4  #counter to fix naming convention
     
     while True :
+        print("length = ", len(leafs))
+        print((len(leafs) // 2))
+        print("counter = ", counter)
         
         for i in range((len(leafs) // 2) + 1) :
+            print()
+            print("i = ", i)
+            
             # if odd number of leafs, make last node only have left child
             if i == ((len(leafs) // 2)) :
                 if len(leafs) % 2 != 0 :
@@ -93,15 +159,12 @@ def makeTree (my_list):
                     break
                 
             else :
-                # checks if the next iteration of max node (i * counter - 1) is greater than our max node
-                # if so, name the last node with our max value and break out of the loop (bc we know this will be the last node)
                 if (i + 1) * counter - 1 > max_node:
                     globals()['node' +"_"+ str(i * counter) +"," +  str(max_node)] = TreeNode(sha256((leafs[i * 2].data[2] + leafs[i * 2 + 1].data[2]).encode('utf-8')).hexdigest())
                     globals()['node' +"_"+ str(i * counter) +"," +  str(max_node)].left = leafs[i * 2]
                     globals()['node' +"_"+ str(i * counter) +"," +  str(max_node)].right = leafs[i * 2 + 1]                
                     print('node' +"_"+ str(i * counter) +"," +  str(max_node))
                     nodes.append(globals()['node' +"_"+ str(i * counter) +"," +  str(max_node)])
-                    break
                 else:
                     globals()['node' +"_"+ str(i * counter) +"," +  str((i + 1) * counter - 1)] = TreeNode(sha256((leafs[i * 2].data[2] + leafs[i * 2 + 1].data[2]).encode('utf-8')).hexdigest())
                     globals()['node' +"_"+ str(i * counter) +"," +  str((i + 1) * counter - 1)].left = leafs[i * 2]
