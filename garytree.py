@@ -36,7 +36,8 @@ def data_parse(filename):
 # Returns the file name as a string
 def get_file():
     try:
-        filename = input("Enter the data file name: ").strip()
+        #filename = input("Enter the data file name: ").strip()
+        filename = "testdata.txt"
         if not filename:
             print ("Please enter a non-empty file name")
             exit(2)
@@ -54,38 +55,53 @@ def makeTree (my_list):
     nodes = []
 
     #makes all of the leaf nodes and adds to an array
-    for i in range(len(my_list)):
-        globals()['node' + str(i)] = TreeNode(my_list[i])
-        leafs.append(globals()['node' + str(i)])
+    for i in range(len(my_list)) :
+        globals()['node' +"_"+ str(i)] = TreeNode(my_list[i])
+        leafs.append(globals()['node' +"_"+ str(i)])
 
-    for i in range(int(len(leafs) / 2)):
+    for i in range(len(leafs) // 2) :
         #this only works for first layer of parent nodes
-        globals()['node' + str(i * 2) + str(i * 2 + 1)] = TreeNode(sha256((leafs[i * 2].data[2] + leafs[i * 2 + 1].data[2]).encode('utf-8')).hexdigest())
+        globals()['node' +"_"+ str(i * 2) +","+ str(i * 2 + 1)] = TreeNode(sha256((leafs[i * 2].data[2] + leafs[i * 2 + 1].data[2]).encode('utf-8')).hexdigest())
+        globals()['node' +"_"+ str(i * 2) +","+ str(i * 2 + 1)].left = leafs[i * 2]
+        globals()['node' +"_"+ str(i * 2) +","+ str(i * 2 + 1)].right = leafs[i * 2 + 1]
+        nodes.append(globals()['node' +"_"+ str(i * 2) +","+ str(i * 2 + 1)])
+    
+    # accounts for the single odd node
+    if len(leafs) % 2 != 0 :
+        globals()['node' +"_"+ str(len(leafs) - 1) +","+ str(len(leafs) - 1)] = TreeNode(sha256((leafs[len(leafs) - 1].data[2]).encode('utf-8')).hexdigest())
+        nodes.append(globals()['node' +"_"+ str(len(leafs) - 1) +","+ str(len(leafs) - 1)])
 
-        globals()['node' + str(i * 2) + str(i * 2 + 1)].left = leafs[i * 2]
-        globals()['node' + str(i * 2) + str(i * 2 + 1)].right = leafs[i * 2 + 1]
-        nodes.append(globals()['node' + str(i * 2) + str(i * 2 + 1)])
-        
     leafs = nodes
     nodes = []
 
     counter = 4  #counter to fix naming convention
     
     while True :
-        for i in range(int(len(leafs) / 2)):
+        print("length = ", len(leafs))
+        print((len(leafs) // 2))
+        print("counter = ", counter)
+        
+        for i in range((len(leafs) // 2) + 1) :
+            print()
+            print("i = ", i)
             
             # if odd number of leafs, make last node only have left child
-            if i == int(len(leafs) / 2) - 1 and len(leafs) % 2 != 0 :
-                globals()['node' + str(i * counter) + str(i * counter + counter/2 - 1)] = TreeNode(leafs[i * 2].data)
-                globals()['node' + str(i * counter) + str(i * counter + counter/2 - 1)].left = leafs[i * 2]              
-                nodes.append(globals()['node' + str(i * counter) + str(i * counter + counter/2 - 1)])
+            if i == ((len(leafs) // 2)) :
+                if len(leafs) % 2 != 0 :
+                    globals()['node' +"_"+ str(i * counter) +"," + str(i * counter)] = TreeNode(leafs[i * 2].data)
+                    globals()['node' +"_"+ str(i * counter) +"," +  str(i * counter)].left = leafs[i * 2]           
+                    print('node' +"_"+ str(i * counter) +"," +  str(i * counter))
+                    nodes.append(globals()['node' +"_"+ str(i * counter) +"," +  str(i * counter)])
+                else :
+                    break
                 
             else :
-                globals()['node' + str(i * counter) + str((i + 1) * counter - 1)] = TreeNode(sha256((leafs[i * 2].data[2] + leafs[i * 2 + 1].data[2]).encode('utf-8')).hexdigest())
-                globals()['node' + str(i * counter) + str((i + 1) * counter - 1)].left = leafs[i * 2]
-                globals()['node' + str(i * counter) + str((i + 1) * counter - 1)].right = leafs[i * 2 + 1]                
-                nodes.append(globals()['node' + str(i * 4) + str((i + 1) * counter - 1)])
-        
+                globals()['node' +"_"+ str(i * counter) +"," +  str((i + 1) * counter - 1)] = TreeNode(sha256((leafs[i * 2].data[2] + leafs[i * 2 + 1].data[2]).encode('utf-8')).hexdigest())
+                globals()['node' +"_"+ str(i * counter) +"," +  str((i + 1) * counter - 1)].left = leafs[i * 2]
+                globals()['node' +"_"+ str(i * counter) +"," +  str((i + 1) * counter - 1)].right = leafs[i * 2 + 1]                
+                print('node' +"_"+ str(i * counter) +"," +  str((i + 1) * counter - 1))
+                nodes.append(globals()['node' +"_"+ str(i * counter) +"," +  str((i + 1) * counter - 1)])
+
         counter = 2 * counter       
         leafs = nodes
         nodes = []
@@ -106,9 +122,9 @@ def test():
     file = get_file()
     data = data_parse(file)
     # again, the data is outputted as follows: [address, balance, hash(address)]
-    for i in data:
-        print(i)  # For testing purposes, print the parsed data
-        print()
+    # for i in data:
+    #     print(i)  # For testing purposes, print the parsed data
+    #     print()
     tree = makeTree(data)
-    print("The tree is: " + tree)
+    print("The root hash is: " + tree)
 test()
