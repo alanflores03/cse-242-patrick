@@ -68,8 +68,8 @@ class TreeNode:
         self.left = None
         self.right = None
 
-# Function to parse data from a data file, parse the data, and return as a list of lists
-# The inner lists contains the entries as [address, balance, hash(address)], with the outer lists storing these entries
+# Function to parse data from a data file line by line and return as a list of lists
+# The inner lists contains the entries as [address, balance, hash(address+balance)], with the outer lists storing these entries
 # Returns a the data of the file as a list of lists
 def data_parse(filename):
     # List to store the entries
@@ -116,65 +116,70 @@ def makeTree (my_list):
     nodes = []
     max_node = 0
 
-    #makes all of the leaf nodes and adds to an array
+    # naming convention is node_x,y where x is the left most related leaf node (child, grandchild etc.) and y is the right most related leaf node
+    # leaf nodes are simply named node_#
+    # counter used for naming purposes
+    counter = 4
+
+    # makes all of the leaf nodes and adds to an array
     for i in range(len(my_list)) :
         globals()['node' +"_"+ str(i)] = TreeNode(my_list[i])
         leafs.append(globals()['node' +"_"+ str(i)])
 
     for i in range(len(leafs) // 2) :
-        #this only works for first layer of parent nodes
+        # this only works for first layer of parent nodes
         globals()['node' +"_"+ str(i * 2) +","+ str(i * 2 + 1)] = TreeNode(sha256((leafs[i * 2].data[2] + leafs[i * 2 + 1].data[2]).encode('utf-8')).hexdigest())
         globals()['node' +"_"+ str(i * 2) +","+ str(i * 2 + 1)].left = leafs[i * 2]
         globals()['node' +"_"+ str(i * 2) +","+ str(i * 2 + 1)].right = leafs[i * 2 + 1]
         nodes.append(globals()['node' +"_"+ str(i * 2) +","+ str(i * 2 + 1)])
     
-    # accounts for the single odd node
+    # accounts for the single odd node left if it exists
     if len(leafs) % 2 != 0 :
         globals()['node' +"_"+ str(len(leafs) - 1) +","+ str(len(leafs) - 1)] = TreeNode(sha256((leafs[len(leafs) - 1].data[2]).encode('utf-8')).hexdigest())
         nodes.append(globals()['node' +"_"+ str(len(leafs) - 1) +","+ str(len(leafs) - 1)])
 
     max_node = len(leafs) - 1
-    leafs = nodes
-    nodes = []
-
-    counter = 4  #counter to fix naming convention
     
     while True :
-        print("length = ", len(leafs))
-        print((len(leafs) // 2))
-        print("counter = ", counter)
+        # print("length = ", len(leafs))
+        # print((len(leafs) // 2))
+        # print("counter = ", counter)
+
+        leafs = nodes
+        nodes = []
         
         for i in range((len(leafs) // 2) + 1) :
-            print()
-            print("i = ", i)
+            # print()
+            # print("i = ", i)
             
-            # if odd number of leafs, make last node only have left child
+            # if odd number of nodes, make last node only have left child
             if i == ((len(leafs) // 2)) :
                 if len(leafs) % 2 != 0 :
                     globals()['node' +"_"+ str(i * counter) +"," + str(max_node)] = TreeNode(leafs[i * 2].data)
                     globals()['node' +"_"+ str(i * counter) +"," +  str(max_node)].left = leafs[i * 2]           
-                    print('node' +"_"+ str(i * counter) +"," +  str(max_node))
+                    # print('node' +"_"+ str(i * counter) +"," +  str(max_node))
                     nodes.append(globals()['node' +"_"+ str(i * counter) +"," +  str(max_node)])
+                # if there is no odd node, we need to break and not go into else statement
                 else :
                     break
                 
+            # normal case
             else :
+                # checks when making right most node that we are numbering correctly with max node val we have and not the max possible value
                 if (i + 1) * counter - 1 > max_node:
                     globals()['node' +"_"+ str(i * counter) +"," +  str(max_node)] = TreeNode(sha256((leafs[i * 2].data[2] + leafs[i * 2 + 1].data[2]).encode('utf-8')).hexdigest())
                     globals()['node' +"_"+ str(i * counter) +"," +  str(max_node)].left = leafs[i * 2]
                     globals()['node' +"_"+ str(i * counter) +"," +  str(max_node)].right = leafs[i * 2 + 1]                
-                    print('node' +"_"+ str(i * counter) +"," +  str(max_node))
+                    # print('node' +"_"+ str(i * counter) +"," +  str(max_node))
                     nodes.append(globals()['node' +"_"+ str(i * counter) +"," +  str(max_node)])
                 else:
                     globals()['node' +"_"+ str(i * counter) +"," +  str((i + 1) * counter - 1)] = TreeNode(sha256((leafs[i * 2].data[2] + leafs[i * 2 + 1].data[2]).encode('utf-8')).hexdigest())
                     globals()['node' +"_"+ str(i * counter) +"," +  str((i + 1) * counter - 1)].left = leafs[i * 2]
                     globals()['node' +"_"+ str(i * counter) +"," +  str((i + 1) * counter - 1)].right = leafs[i * 2 + 1]                
-                    print('node' +"_"+ str(i * counter) +"," +  str((i + 1) * counter - 1))
+                    # print('node' +"_"+ str(i * counter) +"," +  str((i + 1) * counter - 1))
                     nodes.append(globals()['node' +"_"+ str(i * counter) +"," +  str((i + 1) * counter - 1)])
 
         counter = 2 * counter       
-        leafs = nodes
-        nodes = []
         
         if len(leafs) == 1:
             break
@@ -187,4 +192,4 @@ if __name__ == "__main__":
     file = get_file()
     data = data_parse(file)
     tree = makeTree(data)
-    print("The root hash is: " + tree)
+    print("The Merkle root is: " + tree)
