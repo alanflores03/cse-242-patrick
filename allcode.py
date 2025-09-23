@@ -57,7 +57,6 @@ if __name__ == "__main__":
 
 
 ####### garytree.py #######
-
 from hashlib import sha256
 
 
@@ -135,30 +134,25 @@ def makeTree (my_list):
     
     # accounts for the single odd node left if it exists
     if len(leafs) % 2 != 0 :
-        globals()['node' +"_"+ str(len(leafs) - 1) +","+ str(len(leafs) - 1)] = TreeNode(sha256((leafs[len(leafs) - 1].data[2]).encode('utf-8')).hexdigest())
+        globals()['node' +"_"+ str(len(leafs) - 1) +","+ str(len(leafs) - 1)] = TreeNode((leafs[len(leafs) - 1].data[2]))
         nodes.append(globals()['node' +"_"+ str(len(leafs) - 1) +","+ str(len(leafs) - 1)])
 
     max_node = len(leafs) - 1
     
     while True :
-        # print("length = ", len(leafs))
-        # print((len(leafs) // 2))
-        # print("counter = ", counter)
 
         leafs = nodes
         nodes = []
         
         for i in range((len(leafs) // 2) + 1) :
-            # print()
-            # print("i = ", i)
             
             # if odd number of nodes, make last node only have left child
             if i == ((len(leafs) // 2)) :
                 if len(leafs) % 2 != 0 :
                     globals()['node' +"_"+ str(i * counter) +"," + str(max_node)] = TreeNode(leafs[i * 2].data)
                     globals()['node' +"_"+ str(i * counter) +"," +  str(max_node)].left = leafs[i * 2]           
-                    # print('node' +"_"+ str(i * counter) +"," +  str(max_node))
                     nodes.append(globals()['node' +"_"+ str(i * counter) +"," +  str(max_node)])
+
                 # if there is no odd node, we need to break and not go into else statement
                 else :
                     break
@@ -170,13 +164,11 @@ def makeTree (my_list):
                     globals()['node' +"_"+ str(i * counter) +"," +  str(max_node)] = TreeNode(sha256((leafs[i * 2].data[2] + leafs[i * 2 + 1].data[2]).encode('utf-8')).hexdigest())
                     globals()['node' +"_"+ str(i * counter) +"," +  str(max_node)].left = leafs[i * 2]
                     globals()['node' +"_"+ str(i * counter) +"," +  str(max_node)].right = leafs[i * 2 + 1]                
-                    # print('node' +"_"+ str(i * counter) +"," +  str(max_node))
                     nodes.append(globals()['node' +"_"+ str(i * counter) +"," +  str(max_node)])
                 else:
                     globals()['node' +"_"+ str(i * counter) +"," +  str((i + 1) * counter - 1)] = TreeNode(sha256((leafs[i * 2].data[2] + leafs[i * 2 + 1].data[2]).encode('utf-8')).hexdigest())
                     globals()['node' +"_"+ str(i * counter) +"," +  str((i + 1) * counter - 1)].left = leafs[i * 2]
                     globals()['node' +"_"+ str(i * counter) +"," +  str((i + 1) * counter - 1)].right = leafs[i * 2 + 1]                
-                    # print('node' +"_"+ str(i * counter) +"," +  str((i + 1) * counter - 1))
                     nodes.append(globals()['node' +"_"+ str(i * counter) +"," +  str((i + 1) * counter - 1)])
 
         counter = 2 * counter       
