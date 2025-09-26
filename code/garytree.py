@@ -63,20 +63,17 @@ def makeTree (my_list):
 
     # makes all of the leaf nodes and adds to an array
     for i in range(len(my_list)) :
-        globals()['node' +"_"+ str(i)] = TreeNode(my_list[i])
-        leafs.append(globals()['node' +"_"+ str(i)])
+        leafs.append(TreeNode(my_list[i]))
 
     for i in range(len(leafs) // 2) :
         # this only works for first layer of parent nodes
-        globals()['node' +"_"+ str(i * 2) +","+ str(i * 2 + 1)] = TreeNode(sha256((leafs[i * 2].data[2] + leafs[i * 2 + 1].data[2]).encode('utf-8')).hexdigest())
-        globals()['node' +"_"+ str(i * 2) +","+ str(i * 2 + 1)].left = leafs[i * 2]
-        globals()['node' +"_"+ str(i * 2) +","+ str(i * 2 + 1)].right = leafs[i * 2 + 1]
-        nodes.append(globals()['node' +"_"+ str(i * 2) +","+ str(i * 2 + 1)])
+        nodes.append(TreeNode(sha256((leafs[i * 2].data[2] + leafs[i * 2 + 1].data[2]).encode('utf-8')).hexdigest()))
+        nodes[-1].left = leafs[i * 2]
+        nodes[-1].right = leafs[i * 2 + 1]
     
     # accounts for the single odd node left if it exists
     if len(leafs) % 2 != 0 :
-        globals()['node' +"_"+ str(len(leafs) - 1) +","+ str(len(leafs) - 1)] = TreeNode((leafs[len(leafs) - 1].data[2]))
-        nodes.append(globals()['node' +"_"+ str(len(leafs) - 1) +","+ str(len(leafs) - 1)])
+        nodes.append(TreeNode((leafs[len(leafs) - 1].data[2])))
 
     max_node = len(leafs) - 1
     
@@ -90,9 +87,8 @@ def makeTree (my_list):
             # if odd number of nodes, make last node only have left child
             if i == ((len(leafs) // 2)) :
                 if len(leafs) % 2 != 0 :
-                    globals()['node' +"_"+ str(i * counter) +"," + str(max_node)] = TreeNode(leafs[i * 2].data)
-                    globals()['node' +"_"+ str(i * counter) +"," +  str(max_node)].left = leafs[i * 2]           
-                    nodes.append(globals()['node' +"_"+ str(i * counter) +"," +  str(max_node)])
+                    nodes.append(TreeNode(leafs[i * 2].data))
+                    nodes[-1].left = leafs[i * 2]
 
                 # if there is no odd node, we need to break and not go into else statement
                 else :
@@ -102,15 +98,14 @@ def makeTree (my_list):
             else :
                 # checks when making right most node that we are numbering correctly with max node val we have and not the max possible value
                 if (i + 1) * counter - 1 > max_node:
-                    globals()['node' +"_"+ str(i * counter) +"," +  str(max_node)] = TreeNode(sha256((leafs[i * 2].data[2] + leafs[i * 2 + 1].data[2]).encode('utf-8')).hexdigest())
-                    globals()['node' +"_"+ str(i * counter) +"," +  str(max_node)].left = leafs[i * 2]
-                    globals()['node' +"_"+ str(i * counter) +"," +  str(max_node)].right = leafs[i * 2 + 1]                
-                    nodes.append(globals()['node' +"_"+ str(i * counter) +"," +  str(max_node)])
+                    nodes.append(TreeNode(sha256((leafs[i * 2].data[2] + leafs[i * 2 + 1].data[2]).encode('utf-8')).hexdigest()))
+                    nodes[-1].left = leafs[i * 2]
+                    nodes[-1].right = leafs[i * 2 + 1]
+
                 else:
-                    globals()['node' +"_"+ str(i * counter) +"," +  str((i + 1) * counter - 1)] = TreeNode(sha256((leafs[i * 2].data[2] + leafs[i * 2 + 1].data[2]).encode('utf-8')).hexdigest())
-                    globals()['node' +"_"+ str(i * counter) +"," +  str((i + 1) * counter - 1)].left = leafs[i * 2]
-                    globals()['node' +"_"+ str(i * counter) +"," +  str((i + 1) * counter - 1)].right = leafs[i * 2 + 1]                
-                    nodes.append(globals()['node' +"_"+ str(i * counter) +"," +  str((i + 1) * counter - 1)])
+                    nodes.append(TreeNode(sha256((leafs[i * 2].data[2] + leafs[i * 2 + 1].data[2]).encode('utf-8')).hexdigest()))
+                    nodes[-1].left = leafs[i * 2]
+                    nodes[-1].right = leafs[i * 2 + 1]
 
         counter = 2 * counter       
         
