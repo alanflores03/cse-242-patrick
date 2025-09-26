@@ -1,3 +1,4 @@
+from hashlib import sha256
 
 class Block:
     def __init__(self):
@@ -12,3 +13,8 @@ class Block:
             self.diff_target = diff_target
             self.nonce = nonce
     
+
+
+def hash_string(content):
+    hashed = hashlib.sha256(content.encode('utf-8')).hexdigest()
+    return hashed
