@@ -4,7 +4,7 @@ from hashlib import sha256
 from garytree import makeTree, data_parse
 
 class Block:
-    def __init__(self, blockchain, data):
+    def __init__(self, blockchain, filename):
         data = data_parse(filename)
         self.header = build_header(blockchain, data)
         self.ledger = data       
@@ -23,11 +23,11 @@ class Block:
             hash_header = 0
             
         else :
-            previous_header = blockchain[-1] ##peut-on itérer sur les arributs pour les concaténer
+            previous_header = blockchain[-1]
             hash_header = hash_string(previous_header)
             
         hash_root = makeTree(data)
-        diff_target = "7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" #change with Ken image 
+        diff_target = "7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
         nonce = find_nonce(diff_target,hashroot)
         return Header(hash_header, hash_root, diff_target, nonce)
 
