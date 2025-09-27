@@ -1,20 +1,21 @@
+import secrets
+import time
 from hashlib import sha256
 from garytree import makeTree, data_parse
 
 class Block:
-    def __init__(self, blockchain, filename):
+    def __init__(self, blockchain, data):
         data = data_parse(filename)
         self.header = build_header(blockchain, data)
         self.ledger = data       
         
     class Header:
-        def __init__(self, hash_header, hash_root, diff_target, nonce):
-            self.hash_header = hash_header
-            self.hash_root = hash_root
-            self.timestamp = timestamp #define here timestamp
-            self.diff_target = diff_target
+        def __init__(self, header, root, diff, nonce):
+            self.hash_header = header
+            self.hash_root = root
+            self.timestamp = int(time.time())
+            self.diff_target = diff
             self.nonce = nonce
-    
     
     def build_header(self, blockchain, data):
         
@@ -25,19 +26,34 @@ class Block:
             previous_header = blockchain[-1] ##peut-on itérer sur les arributs pour les concaténer
             hash_header = hash_string(previous_header)
             
-        hash_root = hash_string(makeTree(data))
-        diff_target = "0000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" #change with Ken image 
-        # nonce = kenfunction()
+        hash_root = makeTree(data)
+        diff_target = "7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" #change with Ken image 
+        nonce = find_nonce(diff_target,hashroot)
         return Header(hash_header, hash_root, diff_target, nonce)
-        
-  
 
+      
+# this assumes big endian when converting the bytes into int, not sure if that's right bc i'm pretty sure that sunlabs is little endian
+def find_nonce(difficulty, root):
+    # turns root hex string to bytes
+    r = bytes.fromhex(root)
+    # turns difficulty hex string to an unsigned int
+    d = int.from_bytes(bytes.fromhex(difficulty), "big")
+
+    while True:
+        # gets a uniformly random number with 256 bits and converts to bytes
+        nonce = secrets.randbits(256)
+        nonce_bytes = nonce.to_bytes(32, "big")
+
+        # gets the raw byte hashed value of root (as bytes) plus nonce (as bytes)
+        holder = sha256(r + nonce_bytes).digest()
+
+        # if this value cast to an int is less than our target, return the nonce
+        if int.from_bytes(holder, "big") <= d:
+            return nonce
 
 def hash_string(content):
     hashed = hashlib.sha256(content.encode('utf-8')).hexdigest()
     return hashed
-
-
 
 # This function validates the block header data and ensures it is filled out correctly.
 # Returns true if valid, false if not. 
@@ -53,8 +69,6 @@ def validate_header(header):
     if not isinstance(header.nonce, int) or header.nonce < 0:
         return False
     return True
-
-
 
 if __name__ == "__main__":
     
