@@ -79,42 +79,40 @@ if __name__ == "__main__":
     filename = input("Please enter all textfiles you wish to use separated by a space\n").strip()
     files = filename.split(" ")
     # files = ["test.txt","test2.txt", "data/testdata.txt"]
+
+    full_print = input("Do you want to print the full ledger (y/n)?: ").strip()
+
+    while full_print != "y" and full_print != "n":
+        full_print = input("Invalid input. Do you want to print the full ledger (y/n)?: ").strip()
         
     for filename in files:
         new_block = Block(blockchain, filename)
         
         if validate_header(new_block.header) :
             blockchain.append(new_block)
-        
+            out = filename.split(".txt")[0] + ".block.out"
+            with open(out, "w") as file:
+                if full_print == "y":
+                    file.write("BEGIN BLOCK\n")
+                    file.write("BEGIN HEADER\n")
+                    file.write("Hash of previous header: " + str(new_block.header.hash_header) + "\n")
+                    file.write("Merkle root: " + new_block.header.hash_root + "\n")
+                    file.write("Timestamp: " + str(new_block.header.timestamp) + "\n")
+                    file.write("Difficulty target: " + new_block.header.diff_target + "\n")
+                    file.write("Nonce: " + str(new_block.header.nonce) + "\n")
+                    file.write("END HEADER" + "\n")
+                    for el in new_block.ledger:
+                        file.write(el[0] +" "+ el[1] +" "+el[2] + "\n")
+                    file.write("END BLOCK\n")
+                else:
+                    file.write("BEGIN BLOCK\n")
+                    file.write("BEGIN HEADER\n")
+                    file.write("Hash of previous header: " + str(new_block.header.hash_header) + "\n")
+                    file.write("Merkle root: " + new_block.header.hash_root + "\n")
+                    file.write("Timestamp: " + str(new_block.header.timestamp) + "\n")
+                    file.write("Difficulty target: " + new_block.header.diff_target + "\n")
+                    file.write("Nonce: " + str(new_block.header.nonce) + "\n")
+                    file.write("END HEADER" + "\n")
+                    file.write("END BLOCK\n")
         else :
             del new_block
-
-    full_print = input("Do you want to print the full ledger (y/n)?: ").strip()
-
-    while full_print != "y" and full_print != "n":
-        full_print = input("Invalid input. Do you want to print the full ledger (y/n)?: ").strip()
-
-    if full_print == "y":
-        for block in blockchain:
-            print("BEGIN BLOCK")
-            print("BEGIN HEADER")
-            print("Hash of previous header: ",block.header.hash_header)
-            print("Merkle root: ",block.header.hash_root)
-            print("Timestamp: ",block.header.timestamp)
-            print("Difficulty target: ",block.header.diff_target)
-            print("Nonce: ",block.header.nonce)
-            print("END HEADER")
-            for el in block.ledger:
-                print(el)
-            print("END BLOCK\n")
-    else:
-        for block in blockchain:
-            print("BEGIN BLOCK")
-            print("BEGIN HEADER")
-            print("Hash of previous header: ",block.header.hash_header)
-            print("Merkle root: ",block.header.hash_root)
-            print("Timestamp: ",block.header.timestamp)
-            print("Difficulty target: ",block.header.diff_target)
-            print("Nonce: ",block.header.nonce)
-            print("END HEADER")
-            print("END BLOCK\n")
