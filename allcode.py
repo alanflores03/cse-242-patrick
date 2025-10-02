@@ -172,15 +172,9 @@ def makeTree (my_list):
             # normal case
             else :
                 # checks when making right most node that we are numbering correctly with max node val we have and not the max possible value
-                if (i + 1) * counter - 1 > max_node:
-                    nodes.append(TreeNode(sha256((leafs[i * 2].data[2] + leafs[i * 2 + 1].data[2]).encode('utf-8')).hexdigest()))
-                    nodes[-1].left = leafs[i * 2]
-                    nodes[-1].right = leafs[i * 2 + 1]
-
-                else:
-                    nodes.append(TreeNode(sha256((leafs[i * 2].data[2] + leafs[i * 2 + 1].data[2]).encode('utf-8')).hexdigest()))
-                    nodes[-1].left = leafs[i * 2]
-                    nodes[-1].right = leafs[i * 2 + 1]
+                nodes.append(TreeNode(sha256((leafs[i * 2].data + leafs[i * 2 + 1].data).encode('utf-8')).hexdigest()))
+                nodes[-1].left = leafs[i * 2]
+                nodes[-1].right = leafs[i * 2 + 1]
 
         counter = 2 * counter       
         
@@ -205,6 +199,7 @@ if __name__ == "__main__":
 #############
 
 import secrets
+import os
 import time
 from hashlib import sha256
 from garytree import makeTree, data_parse
@@ -241,9 +236,9 @@ class Block:
 # this assumes big endian when converting the bytes into int, not sure if that's right bc i'm pretty sure that sunlabs is little endian
 def find_nonce(difficulty, root):
     # turns root hex string to bytes
-    r = bytes.fromhex(root)
+    root = bytes.fromhex(root)
     # turns difficulty hex string to an unsigned int
-    d = int.from_bytes(bytes.fromhex(difficulty), "big")
+    difficulty = int.from_bytes(bytes.fromhex(difficulty), "big")
 
     while True:
         # gets a uniformly random number with 256 bits and converts to bytes
@@ -251,10 +246,10 @@ def find_nonce(difficulty, root):
         nonce_bytes = nonce.to_bytes(32, "big")
 
         # gets the raw byte hashed value of root (as bytes) plus nonce (as bytes)
-        holder = sha256(r + nonce_bytes).digest()
+        holder = sha256(root + nonce_bytes).digest()
 
         # if this value cast to an int is less than our target, return the nonce
-        if int.from_bytes(holder, "big") <= d:
+        if int.from_bytes(holder, "big") <= difficulty:
             return nonce
 
 def hash_string(content):
@@ -271,54 +266,92 @@ def validate_header(header):
         return False
     if header.timestamp < 0:
         return False
-    d = int.from_bytes(bytes.fromhex(header.diff_target), "big")
-    if d <= 0 or d > 2 ** 255 - 1:
+    difficulty = int.from_bytes(bytes.fromhex(header.diff_target), "big")
+    if difficulty <= 0 or difficulty > ((2 ** 256) - 1):
         return False
     if not isinstance(header.nonce, int) or header.nonce < 0:
         return False
     return True
 
+
+# Function to serialize the block to a file
+def serialize_block(block, file, full_print):
+    if (full_print =="y"):
+        result = "BEGIN BLOCK\n"
+        result += "BEGIN HEADER\n"
+        result += "Hash of previous header: " + str(block.header.hash_header) + "\n"
+        result += "Merkle root: " + block.header.hash_root + "\n"
+        result += "Timestamp: " + str(block.header.timestamp) + "\n"
+        result += "Difficulty target: " + block.header.diff_target + "\n"
+        result += "Nonce: " + str(block.header.nonce) + "\n"
+        result += "END HEADER" + "\n"
+        for accounts in block.ledger:
+            result += accounts[0] +" "+ accounts[1] +" "+accounts[2] + "\n"
+        result += "END BLOCK\n"
+    else:
+        result = "BEGIN BLOCK\n"
+        result += "BEGIN HEADER\n"
+        result += "Hash of previous header: " + str(block.header.hash_header) + "\n"
+        result += "Merkle root: " + block.header.hash_root + "\n"
+        result += "Timestamp: " + str(block.header.timestamp) + "\n"
+        result += "Difficulty target: " + block.header.diff_target + "\n"
+        result += "Nonce: " + str(block.header.nonce) + "\n"
+        result += "END HEADER" + "\n"
+        result += "END BLOCK\n"
+    try:
+        file = file.split(".txt")[0] + ".block.out"
+        with open(file, "w") as f:
+            f.write(result)
+    except Exception as e:
+        print(f"An Unexpected error occurred: {e}")
+        exit(1)
+
+
+
+# function to get the files list
+def get_files():
+    filename = input("Please enter all textfiles you wish to use separated by a space\n").strip()
+    files = filename.split(" ")
+    while not valid_files(files):
+        filename = input("Please enter valid files you wish to use separated by a space\n").strip()
+        files = filename.split(" ")
+    return files
+
+
+# Function to validate the input files
+def valid_files(files):
+    for file in files:
+        try:
+            if not os.path.isfile(file):
+                print(f"File '{file}' does not exist.")
+                return False
+        except Exception as e:
+            print(f"An Unexpected error occurred: {e}")
+            return False
+    return True
+
+# Function to get print preference
+def get_print_preference():
+    full_print = input("Do you want to print the full ledger (y/n)?: ").strip().lower()
+    while full_print != "y" and full_print != "n":
+        full_print = input("Invalid input. Do you want to print the full ledger (y/n)?: ").strip().lower()
+    return full_print
+
+
 if __name__ == "__main__":
     
     blockchain = []
     
-    filename = input("Please enter all textfiles you wish to use separated by a space\n").strip()
-    files = filename.split(" ")
-    # files = ["test.txt","test2.txt", "data/testdata.txt"]
+    files = get_files()
 
-    full_print = input("Do you want to print the full ledger (y/n)?: ").strip()
-
-    while full_print != "y" and full_print != "n":
-        full_print = input("Invalid input. Do you want to print the full ledger (y/n)?: ").strip()
+    full_print = get_print_preference()
         
     for filename in files:
         new_block = Block(blockchain, filename)
         
         if validate_header(new_block.header) :
             blockchain.append(new_block)
-            out = filename.split(".txt")[0] + ".block.out"
-            with open(out, "w") as file:
-                if full_print == "y":
-                    file.write("BEGIN BLOCK\n")
-                    file.write("BEGIN HEADER\n")
-                    file.write("Hash of previous header: " + str(new_block.header.hash_header) + "\n")
-                    file.write("Merkle root: " + new_block.header.hash_root + "\n")
-                    file.write("Timestamp: " + str(new_block.header.timestamp) + "\n")
-                    file.write("Difficulty target: " + new_block.header.diff_target + "\n")
-                    file.write("Nonce: " + str(new_block.header.nonce) + "\n")
-                    file.write("END HEADER" + "\n")
-                    for el in new_block.ledger:
-                        file.write(el[0] +" "+ el[1] +" "+el[2] + "\n")
-                    file.write("END BLOCK\n")
-                else:
-                    file.write("BEGIN BLOCK\n")
-                    file.write("BEGIN HEADER\n")
-                    file.write("Hash of previous header: " + str(new_block.header.hash_header) + "\n")
-                    file.write("Merkle root: " + new_block.header.hash_root + "\n")
-                    file.write("Timestamp: " + str(new_block.header.timestamp) + "\n")
-                    file.write("Difficulty target: " + new_block.header.diff_target + "\n")
-                    file.write("Nonce: " + str(new_block.header.nonce) + "\n")
-                    file.write("END HEADER" + "\n")
-                    file.write("END BLOCK\n")
+            serialize_block(new_block, filename, full_print)
         else :
             del new_block
+

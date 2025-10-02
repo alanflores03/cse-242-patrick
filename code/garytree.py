@@ -97,15 +97,9 @@ def makeTree (my_list):
             # normal case
             else :
                 # checks when making right most node that we are numbering correctly with max node val we have and not the max possible value
-                if (i + 1) * counter - 1 > max_node:
-                    nodes.append(TreeNode(sha256((leafs[i * 2].data[2] + leafs[i * 2 + 1].data[2]).encode('utf-8')).hexdigest()))
-                    nodes[-1].left = leafs[i * 2]
-                    nodes[-1].right = leafs[i * 2 + 1]
-
-                else:
-                    nodes.append(TreeNode(sha256((leafs[i * 2].data[2] + leafs[i * 2 + 1].data[2]).encode('utf-8')).hexdigest()))
-                    nodes[-1].left = leafs[i * 2]
-                    nodes[-1].right = leafs[i * 2 + 1]
+                nodes.append(TreeNode(sha256((leafs[i * 2].data + leafs[i * 2 + 1].data).encode('utf-8')).hexdigest()))
+                nodes[-1].left = leafs[i * 2]
+                nodes[-1].right = leafs[i * 2 + 1]
 
         counter = 2 * counter       
         
