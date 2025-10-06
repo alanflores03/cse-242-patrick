@@ -5,9 +5,14 @@ from hashlib import sha256
 from garytree import makeTree, data_parse
 
 class Block:
-    def __init__(self, blockchain, filename):
+    def __init__(self, blockchain, filename, bad_block):
         data = data_parse(filename)
-        self.header = self.build_header(blockchain, data)
+        
+        if bad_block:
+            self.header = self.build_bad_block_header(blockchain, data)
+        else:
+            self.header = self.build_header(blockchain, data)
+            
         self.ledger = data       
         
     class Header:
@@ -17,6 +22,20 @@ class Block:
             self.timestamp = int(time.time())
             self.diff_target = diff
             self.nonce = nonce
+            
+    def build_bad_block_header(self, blockchain, data):
+        if len(blockchain) == 0 :
+            hash_header = 0
+            
+        else :
+            prev = blockchain[-1].header
+            hash_header = hash_string(str(prev.hash_header) + prev.hash_root + str(prev.timestamp) + prev.diff_target + str(prev.nonce))
+            
+        hash_root = secrets.token_hex(32) # random 64 char hex string
+        diff_target = "7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        nonce = secrets.randbits(256)
+        return Block.Header(hash_header, hash_root, diff_target, nonce)
+    
     
     def build_header(self, blockchain, data):
         
@@ -147,7 +166,8 @@ if __name__ == "__main__":
     full_print = get_print_preference()
         
     for filename in files:
-        new_block = Block(blockchain, filename)
+        bad_block = (secrets.randbelow(100) + 1) <= 10 # 10% chance of being a bad block
+        new_block = Block(blockchain, filename, bad_block)
         
         if validate_header(new_block.header) :
             blockchain.append(new_block)
