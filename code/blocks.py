@@ -86,7 +86,7 @@ def serialize_block(block, file, full_print):
         result += "Nonce: " + str(block.header.nonce) + "\n"
         result += "END HEADER" + "\n"
         for accounts in block.ledger:
-            result += accounts[0] +" "+ accounts[1] +" "+accounts[2] + "\n"
+            result += accounts[0] +" "+ accounts[1] + "\n"
         result += "END BLOCK\n"
     else:
         result = "BEGIN BLOCK\n"
