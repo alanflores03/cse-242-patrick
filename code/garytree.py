@@ -47,66 +47,9 @@ def get_file():
         print(f"An Unexpected error occurred: {e}")
         exit(1)
         
-# Function to make the Merkle Tree
-# my_list will be the list returned from get_file()
-# Iterates through each layer of the Merkle tree, hashing and adding children
 # Returns only the hash of the Merkle root
 def makeTree (my_list):
-    leafs = []
-    nodes = []
-    max_node = 0
-
-    # naming convention is node_x,y where x is the left most related leaf node (child, grandchild etc.) and y is the right most related leaf node
-    # leaf nodes are simply named node_#
-    # counter used for naming purposes
-    counter = 4
-
-    # makes all of the leaf nodes and adds to an array
-    for i in range(len(my_list)) :
-        leafs.append(TreeNode(my_list[i]))
-
-    for i in range(len(leafs) // 2) :
-        # this only works for first layer of parent nodes
-        nodes.append(TreeNode(sha256((leafs[i * 2].data[2] + leafs[i * 2 + 1].data[2]).encode('utf-8')).hexdigest()))
-        nodes[-1].left = leafs[i * 2]
-        nodes[-1].right = leafs[i * 2 + 1]
-    
-    # accounts for the single odd node left if it exists
-    if len(leafs) % 2 != 0 :
-        nodes.append(TreeNode((leafs[len(leafs) - 1].data[2])))
-
-    max_node = len(leafs) - 1
-    
-    while True :
-
-        leafs = nodes
-        nodes = []
-        
-        for i in range((len(leafs) // 2) + 1) :
-            
-            # if odd number of nodes, make last node only have left child
-            if i == ((len(leafs) // 2)) :
-                if len(leafs) % 2 != 0 :
-                    nodes.append(TreeNode(leafs[i * 2].data))
-                    nodes[-1].left = leafs[i * 2]
-
-                # if there is no odd node, we need to break and not go into else statement
-                else :
-                    break
-                
-            # normal case
-            else :
-                # checks when making right most node that we are numbering correctly with max node val we have and not the max possible value
-                nodes.append(TreeNode(sha256((leafs[i * 2].data + leafs[i * 2 + 1].data).encode('utf-8')).hexdigest()))
-                nodes[-1].left = leafs[i * 2]
-                nodes[-1].right = leafs[i * 2 + 1]
-
-        counter = 2 * counter       
-        
-        if len(leafs) == 1:
-            break
-    
-    return leafs[0].data
+    return getTree(my_list).data
 
 # Function to make the Merkle Tree
 # my_list will be the list returned from get_file()
