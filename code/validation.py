@@ -150,7 +150,8 @@ if __name__ == "__main__":
     full_print = get_print_preference()
         
     for filename in files:
-        new_block = Block(blockchain, filename)
+        bad_block = (secrets.randbelow(100) + 1) <= 10 # 10% chance of being a bad block
+        new_block = Block(blockchain, filename, bad_block)
         
         if validate_header(new_block.header) :
             blockchain.append(new_block)
