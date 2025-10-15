@@ -102,11 +102,27 @@ def serialize_block(block, file, full_print):
         file = file.split(".txt")[0] + ".block.out"
         with open(file, "w") as f:
             f.write(result)
+
+        #write to complete output
+        write_complete_output(result, "data/complete.block.out")
     except Exception as e:
         print(f"An Unexpected error occurred: {e}")
         exit(1)
 
 
+# Function to write all output to single file
+def write_complete_output(content, output_file):
+
+    #if file exits, decide whether to write or to append
+    if os.path.exists(output_file):
+        mode = 'a' #append to the existing file
+    else:
+        mode = 'w' #create a new file
+
+    #write content to output_file
+    with open(output_file, mode) as dst:
+        dst.write(content)
+    
 
 # function to get the files list
 def get_files():
@@ -139,6 +155,13 @@ def get_print_preference():
 
 
 if __name__ == "__main__":
+
+    #clearing existing data if file exists only on initial run through
+    complete_output = "data/complete.block.out"
+
+    if(os.path.isfile(complete_output)):
+        file = open(complete_output,'w')
+        file.close()
     
     blockchain = []
     
