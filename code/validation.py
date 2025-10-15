@@ -1,11 +1,67 @@
-from hashlib import sha256
-from garytree import getTree, data_parse, get_file
-from blocks import Block, validate_header, serialize_block, get_files, get_print_preference
+from garytree import getTree, data_parse, makeTree
+from blocks import Block, validate_header, serialize_block, get_files, get_print_preference, hash_string
+import tempfile
+import os
 from math import log, ceil
 # from collections import deque
 
+# Function to take a block as input and return a boolean indicating if it is valid
+def validation_block(block):
+    data = get_account_data(block)
+    root = makeTree(data) # returns hashed root
 
-# do balance and proof-of-membership
+    if (root == block.header.hash_root):
+        return True # if they are the same root
+    else:
+        return False # if they are not the same
+
+# Function to valid a blockchain, returns true if chain is valid, false otherwise
+def validation_chain(blockchain):
+
+    # if empty chain
+    if not blockchain:
+        return False
+    
+    # Checking genisis block outside of loop because no previous root
+    if(not validation_block(blockchain[0])):
+        return False 
+    
+    # Validate remainder of the chain
+    for i in range(1, len(blockchain)):
+        block = blockchain[i]
+        
+        #validating each block
+        if(not validation_block(block)):
+            return False
+        
+        # check previous header
+        prev = blockchain[i - 1].header
+        previous_hash_header = hash_string(str(prev.hash_header) + prev.hash_root + str(prev.timestamp) + prev.diff_target + str(prev.nonce))
+        if(block.header.hash_header != previous_hash_header):
+            return False # means found invalid match of hashed headers
+        
+    return True # if entire chain matches expectations
+
+
+
+# Function to get the account data from the block as a list to be passed into makeTree 
+def get_account_data(block):
+    accounts = []
+    for account in block.ledger:
+        info = account[0] +" "+ account[1]
+        accounts.append(info)
+
+    with tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8') as file:
+        file.write("\n".join(accounts))
+        filename = file.name
+    
+    try:
+        data = data_parse(filename)
+    finally:
+        #take care of temp file
+        os.unlink(filename)
+
+    return data
 
 # given an account string and a blockchain, either return the balance of the account or that the account doesn't exist in the blockchain
 def balance(account, blockchain):
