@@ -51,14 +51,6 @@ def validation_block(block, current_time, previous_timestamp=None, previous_bloc
         holder = sha256(block.header.hash_root + nonce_bytes).digest()
         if int.from_bytes(holder, "big") > difficulty:
             return (False, 'Invalid nonce')
- 
-        
-        # # check previous header
-        # prev = previous_block.header
-        # previous_hash_header = hash_string(str(prev.hash_header) + prev.hash_root + str(prev.timestamp) + prev.diff_target + str(prev.nonce))
-        
-        # if block.header.hash_header != previous_hash_header :
-        #     return (False, 'Previous header hash invalid') # means found invalid match of hashed headers
     
     return (True, None) # if all checks passed
         
