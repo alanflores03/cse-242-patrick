@@ -41,13 +41,24 @@ def validation_block(block, current_time, previous_timestamp=None, previous_bloc
             return (False, 'Timestamp in future')
         elif block.header.timestamp < previous_timestamp :
             return (False, 'Timestamp less than previous block')
+
+        # Instead of a hard coded value, in the future we may need to check against some global variable
+        if block.header.diff_target != "7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff":
+            return (False, 'Incorrect difficulty target')
+
+        # Reused code from find_nonce in blocks.py
+        nonce_bytes = block.header.nonce.to_bytes(32, "big")
+        holder = sha256(block.header.hash_root + nonce_bytes).digest()
+        if int.from_bytes(holder, "big") > difficulty:
+            return (False, 'Invalid nonce')
+ 
         
-        # check previous header
-        prev = previous_block.header
-        previous_hash_header = hash_string(str(prev.hash_header) + prev.hash_root + str(prev.timestamp) + prev.diff_target + str(prev.nonce))
+        # # check previous header
+        # prev = previous_block.header
+        # previous_hash_header = hash_string(str(prev.hash_header) + prev.hash_root + str(prev.timestamp) + prev.diff_target + str(prev.nonce))
         
-        if block.header.hash_header != previous_hash_header :
-            return (False, 'Previous header hash invalid') # means found invalid match of hashed headers
+        # if block.header.hash_header != previous_hash_header :
+        #     return (False, 'Previous header hash invalid') # means found invalid match of hashed headers
     
     return (True, None) # if all checks passed
         
@@ -85,8 +96,6 @@ def validation_chain(blockchain):
         previous_block = block
     
     return (True, None, None) # if entire chain matches expectations
-
-
 
 # Function to get the account data from the block as a list to be passed into makeTree 
 def get_account_data(block):
