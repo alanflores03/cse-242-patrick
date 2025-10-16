@@ -3,44 +3,88 @@ from blocks import Block, validate_header, serialize_block, get_files, get_print
 import tempfile
 import os
 from math import log, ceil
+import time
+import secrets
 # from collections import deque
 
 # Function to take a block as input and return a boolean indicating if it is valid
-def validation_block(block):
-    data = get_account_data(block)
-    root = makeTree(data) # returns hashed root
+def validation_block(block, current_time, previous_timestamp=None, previous_block=None):
+    
+    if not previous_block: # if genesis block
+        
+        data = get_account_data(block)
+        root = makeTree(data) # returns hashed root
 
-    if (root == block.header.hash_root):
-        return True # if they are the same root
-    else:
-        return False # if they are not the same
+        # check merkle root
+        if root != block.header.hash_root :
+            return (False, 'Bad Merkle root') # if they are not the same
+        
+        # check timestamp
+        if block.header.timestamp > current_time + 1 :
+            return (False, 'Timestamp in future')
+        
+        # check previous header
+        if block.header.hash_header != 0 :
+            return (False, 'Previous header hash invalid') # means found invalid match of hashed headers
+
+
+    else :
+                
+        data = get_account_data(block)
+        root = makeTree(data) # returns hashed root
+
+        if root != block.header.hash_root :
+            return (False, 'Bad Merkle root') # if they are not the same
+        
+        # check timestamp
+        if block.header.timestamp > current_time + 1 :
+            return (False, 'Timestamp in future')
+        elif block.header.timestamp < previous_timestamp :
+            return (False, 'Timestamp less than previous block')
+        
+        # check previous header
+        prev = previous_block.header
+        previous_hash_header = hash_string(str(prev.hash_header) + prev.hash_root + str(prev.timestamp) + prev.diff_target + str(prev.nonce))
+        
+        if block.header.hash_header != previous_hash_header :
+            return (False, 'Previous header hash invalid') # means found invalid match of hashed headers
+    
+    return (True, None) # if all checks passed
+        
+
 
 # Function to valid a blockchain, returns true if chain is valid, false otherwise
 def validation_chain(blockchain):
 
     # if empty chain
     if not blockchain:
-        return False
+        return (False, 0, 'No blockchain')
+    
+    current_time = int(time.time())
     
     # Checking genisis block outside of loop because no previous root
-    if(not validation_block(blockchain[0])):
-        return False 
+    genesis_block_validation = validation_block(blockchain[0], current_time)
+    
+    if not genesis_block_validation[0] :
+        return (False, 0, genesis_block_validation[1])
+  
+    previous_timestamp = blockchain[0].header.timestamp
+    previous_block = blockchain[0]    
     
     # Validate remainder of the chain
-    for i in range(1, len(blockchain)):
+    for i in range(1, len(blockchain)) :
         block = blockchain[i]
+        block_validation = validation_block(block, current_time, previous_timestamp, previous_block)
         
         #validating each block
-        if(not validation_block(block)):
-            return False
+        if not block_validation[0] :
+            return (False, i, block_validation[1])
         
-        # check previous header
-        prev = blockchain[i - 1].header
-        previous_hash_header = hash_string(str(prev.hash_header) + prev.hash_root + str(prev.timestamp) + prev.diff_target + str(prev.nonce))
-        if(block.header.hash_header != previous_hash_header):
-            return False # means found invalid match of hashed headers
-        
-    return True # if entire chain matches expectations
+    
+        previous_timestamp = block.header.timestamp
+        previous_block = block
+    
+    return (True, None, None) # if entire chain matches expectations
 
 
 
@@ -142,15 +186,28 @@ def proofOfMembership(account, blockchain):
 
     return False, output, None
 
+def get_failure_percentage():
+    while True:
+        try:
+            percent_bad = int(input("Enter the percentage of bad blocks (0-100): ").strip())
+            if 0 <= percent_bad <= 100:
+                return percent_bad
+            else:
+                print("Percentage must be between 0 and 100.")
+        except ValueError:
+            print("Invalid input. Please enter an integer between 0 and 100.")
+            
 if __name__ == "__main__":
     blockchain = []
     
     files = get_files()
+    
+    percent_bad = get_failure_percentage()
 
     full_print = get_print_preference()
         
     for filename in files:
-        bad_block = (secrets.randbelow(100) + 1) <= 10 # 10% chance of being a bad block
+        bad_block = (secrets.randbelow(100) + 1) <= percent_bad
         new_block = Block(blockchain, filename, bad_block)
         
         if validate_header(new_block.header) :
@@ -159,5 +216,6 @@ if __name__ == "__main__":
         else :
             del new_block
 
+    print('Blockchain validation: \n', 'Valid' if validation_chain(blockchain)[0] else f"Invalid : {validation_chain(blockchain)[2]} at block {validation_chain(blockchain)[1]}")
     print(balance("f294de1165d00fe497bbf89ff86aa5988239718c", blockchain))
     

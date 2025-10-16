@@ -10,31 +10,53 @@ class Block:
         
         if bad_block:
             self.header = self.build_bad_block_header(blockchain, data)
+            print("Bad block created, filename:", filename)
         else:
             self.header = self.build_header(blockchain, data)
             
         self.ledger = data       
         
     class Header:
-        def __init__(self, header, root, diff, nonce):
+        def __init__(self, header, root, timestamp, diff, nonce):
             self.hash_header = header
             self.hash_root = root
-            self.timestamp = int(time.time())
+            self.timestamp = timestamp
             self.diff_target = diff
             self.nonce = nonce
             
     def build_bad_block_header(self, blockchain, data):
+        random = (secrets.randbelow(100) + 1)
+        
         if len(blockchain) == 0 :
-            hash_header = 0
+            if random <= 33: # bad prev hash header
+                hash_header = '0'*64
+                print('bad previous hash header - ', end='')
+            else :
+                hash_header = 0
             
         else :
-            prev = blockchain[-1].header
-            hash_header = hash_string(str(prev.hash_header) + prev.hash_root + str(prev.timestamp) + prev.diff_target + str(prev.nonce))
+            if random <= 33 : # bad prev hash header
+                hash_header = 0
+                print('bad previous hash header - ', end='')
+            else :
+                prev = blockchain[-1].header
+                hash_header = hash_string(str(prev.hash_header) + prev.hash_root + str(prev.timestamp) + prev.diff_target + str(prev.nonce))
+        
+        if random > 33 and random <= 66 : # bad merkle root
+            hash_root = secrets.token_hex(32) # random 64 char hex string
+            print('bad merkle root - ', end='')
+        else :
+            hash_root = makeTree(data)
             
-        hash_root = secrets.token_hex(32) # random 64 char hex string
+        if random > 66 : # bad timestamp
+            timestamp = 0
+            print('bad timestamp - ', end='')
+        else :
+            timestamp = int(time.time())
+            
         diff_target = "7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
         nonce = secrets.randbits(256)
-        return Block.Header(hash_header, hash_root, diff_target, nonce)
+        return Block.Header(hash_header, hash_root, timestamp, diff_target, nonce)
     
     
     def build_header(self, blockchain, data):
@@ -47,9 +69,10 @@ class Block:
             hash_header = hash_string(str(prev.hash_header) + prev.hash_root + str(prev.timestamp) + prev.diff_target + str(prev.nonce))
             
         hash_root = makeTree(data)
+        timestamp = int(time.time())
         diff_target = "7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
         nonce = find_nonce(diff_target,hash_root)
-        return Block.Header(hash_header, hash_root, diff_target, nonce)
+        return Block.Header(hash_header, hash_root, timestamp, diff_target, nonce)
 
       
 # this assumes big endian when converting the bytes into int, not sure if that's right bc i'm pretty sure that sunlabs is little endian

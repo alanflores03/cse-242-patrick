@@ -1,0 +1,9 @@
+BEGIN BLOCK
+BEGIN HEADER
+Hash of previous header: 0
+Merkle root: 1cc6225085bfc8bb54bd3f210d90388a64a574bb1eabb582530acab1191945e5
+Timestamp: 1760575082
+Difficulty target: 7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+Nonce: 65070073155373701068495485796037947652743192635748592380191696268786071229165
+END HEADER
+END BLOCK
