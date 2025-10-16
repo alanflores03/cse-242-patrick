@@ -5,6 +5,7 @@ import os
 from math import log, ceil
 import time
 import secrets
+from hashlib import sha256
 # from collections import deque
 
 # Function to take a block as input and return a boolean indicating if it is valid
@@ -49,6 +50,7 @@ def validation_block(block, current_time, previous_timestamp=None, previous_bloc
         # Reused code from find_nonce in blocks.py
         nonce_bytes = block.header.nonce.to_bytes(32, "big")
         holder = sha256(block.header.hash_root + nonce_bytes).digest()
+        difficulty = int(block.header.diff_target, 16)
         if int.from_bytes(holder, "big") > difficulty:
             return (False, 'Invalid nonce')
     
@@ -217,6 +219,6 @@ if __name__ == "__main__":
         else :
             del new_block
 
-    print('Blockchain validation: \n', 'Valid' if validation_chain(blockchain)[0] else f"Invalid : {validation_chain(blockchain)[2]} at block {validation_chain(blockchain)[1]}")
+    print('Blockchain validation:\n', 'Valid' if validation_chain(blockchain)[0] else f"Invalid: {validation_chain(blockchain)[2]} at block {validation_chain(blockchain)[1]}")
     print(balance("f294de1165d00fe497bbf89ff86aa5988239718c", blockchain))
     
